@@ -1,4 +1,4 @@
-apply plugin: 'marytts-voicebuilding'
+apply plugin: 'de.dfki.mary.voicebuilding'
 
 group "de.dfki.mary"
 
