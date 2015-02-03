@@ -1,6 +1,7 @@
 apply plugin: 'de.dfki.mary.voicebuilding'
 
-group "de.dfki.mary"
+group 'de.dfki.mary'
+version '5.1.2'
 
 voice {
     name 'dfki-pavoque-styles'
