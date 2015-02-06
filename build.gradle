@@ -2,13 +2,3 @@ apply plugin: 'de.dfki.mary.voicebuilding'
 
 group 'de.dfki.mary'
 version '5.1.2'
-
-voice {
-    name 'dfki-pavoque-styles'
-    language 'de'
-    gender 'male'
-    type 'unit selection'
-    description 'A male German unit selection voice with expressive styles "happy", "sad", "angry", and "poker"'
-    samplingRate 16000
-    wantsToBeDefault 20
-}
