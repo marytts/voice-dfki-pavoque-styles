@@ -1,6 +1,8 @@
 voice {
     name = 'dfki-pavoque-styles'
-    language = 'de'
+    locale {
+        language = 'de'
+    }
     gender = 'male'
     type = 'unit selection'
     description = 'A male German unit selection voice with expressive styles "happy", "sad", "angry", and "poker"'
