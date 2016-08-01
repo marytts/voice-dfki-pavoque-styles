@@ -122,12 +122,27 @@ task extractWav {
 }
 
 task generateStyleDefinitionFile {
-    def destFile = file("$buildDir/styles.txt")
+    ext.destFile = file("$buildDir/styles.txt")
     outputs.files destFile
     doLast {
         destFile.withWriter { writer ->
             stylemap.each { style, prefix ->
                 writer.println "${prefix}_* = $style"
+            }
+        }
+    }
+}
+
+legacyInit {
+    dependsOn extractLab, extractText, extractWav, generateStyleDefinitionFile
+    doLast {
+        copy {
+            from project.templates
+            into project.buildDir
+            include configFile.name
+            expand project.properties
+            filter {
+                it.contains('AllophonesExtractor.styleDefinitionFile') ? it + generateStyleDefinitionFile.destFile : it
             }
         }
     }
