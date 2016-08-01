@@ -97,3 +97,26 @@ task extractText {
         }
     }
 }
+
+task extractWav {
+    dependsOn downloadData, downloadAudio
+    ext.destDir = file("$buildDir/wav")
+    inputs.files yamlFiles, flacFiles
+    outputs.dir destDir
+    doFirst {
+        destDir.mkdirs()
+    }
+    doLast {
+        [yamlFiles, flacFiles].transpose().each { yamlFile, flacFile ->
+            new Yaml().load(yamlFile.newReader()).each { utterance ->
+                if (utterance.segments) {
+                    exec {
+                        commandLine 'sox', flacFile, "$destDir/${stylemap[utterance.style]}_${utterance.prompt}.wav",
+                                'trim', utterance.start, "=$utterance.end",
+                                'rate', voice.samplingRate
+                    }
+                }
+            }
+        }
+    }
+}
