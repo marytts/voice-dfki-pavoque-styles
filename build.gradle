@@ -31,6 +31,7 @@ voice {
 
 ext {
     styles = ['angry', 'happy', 'neutral', 'poker', 'sad']
+    stylemap = [styles, ['sp', 'pp', 'ne', 'pk', 'ob']].transpose().collectEntries()
     flacFiles = styles.collect { file("$buildDir/pavoque-${it}.flac") }
     yamlFiles = styles.collect { file("$buildDir/pavoque-${it}.yaml") }
 }
@@ -50,4 +51,28 @@ task downloadData(type: Download) {
     dest buildDir
     overwrite false
     acceptAnyCertificate true
+}
+
+task extractLab {
+    dependsOn downloadData
+    def destDir = file("$buildDir/lab")
+    inputs.file yamlFiles
+    outputs.dir destDir
+    doFirst {
+        destDir.mkdirs()
+    }
+    doLast {
+        yamlFiles.each { yamlFile ->
+            new Yaml().load(yamlFile.newReader()).each { utterance ->
+                if (utterance.segments) {
+                    file("$destDir/${stylemap[utterance.style]}_${utterance.prompt}.lab").withWriter { writer ->
+                        writer.println '#'
+                        utterance.segments.each { segment ->
+                            writer.println "$segment.end 125 $segment.lab"
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
