@@ -120,3 +120,15 @@ task extractWav {
         }
     }
 }
+
+task generateStyleDefinitionFile {
+    def destFile = file("$buildDir/styles.txt")
+    outputs.files destFile
+    doLast {
+        destFile.withWriter { writer ->
+            stylemap.each { style, prefix ->
+                writer.println "${prefix}_* = $style"
+            }
+        }
+    }
+}
