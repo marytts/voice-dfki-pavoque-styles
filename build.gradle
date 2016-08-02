@@ -136,7 +136,62 @@ task generateStyleDefinitionFile {
 
 legacyInit {
     dependsOn extractLab, extractText, extractWav, generateStyleDefinitionFile
+    def basenameListFile = file("$buildDir/basenames.lst")
+    outputs.files basenameListFile
     doLast {
+        basenameListFile.withWriter { basenameList ->
+            fileTree(wav.destDir).collect {
+                it.name - '.wav'
+            }.minus([
+                    'ne_a0181',
+                    'ne_a0215',
+                    'ne_a0225',
+                    'ne_a0385',
+                    'ne_a0401',
+                    'ne_a0425',
+                    'ne_a0544',
+                    'ne_a0718',
+                    'ne_a0923',
+                    'ne_a1095',
+                    'ne_a1332',
+                    'ne_a1590',
+                    'ne_e0078',
+                    'ne_e0101',
+                    'ne_e0197',
+                    'ne_e0268',
+                    'ne_e0529',
+                    'ne_e0569',
+                    'ne_e0795',
+                    'ne_e0858',
+                    'ne_e0928',
+                    'ne_e0959',
+                    'ne_e0966',
+                    'ne_e1094',
+                    'ne_e1113',
+                    'ne_e1137',
+                    'ne_e1149',
+                    'ne_e1175',
+                    'ne_e1269',
+                    'ne_e1282',
+                    'ne_e1301',
+                    'ob_m0222',
+                    'ob_m0281',
+                    'ob_m0304',
+                    'ob_m0319',
+                    'ob_poker_d0027',
+                    'pk_m0222',
+                    'pk_m0281',
+                    'pk_m0304',
+                    'pp_m0222',
+                    'pp_m0281',
+                    'pp_m0304',
+                    'sp_m0222',
+                    'sp_m0281',
+                    'sp_m0304'
+            ]).each {
+                basenameList.writeLine it
+            }
+        }
         copy {
             from project.templates
             into project.buildDir
