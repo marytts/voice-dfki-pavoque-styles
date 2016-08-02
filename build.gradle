@@ -203,3 +203,38 @@ legacyInit {
         }
     }
 }
+
+task customizeWeights << {
+    def customWeights = new ConfigSlurper().parse(file('weights.gradle').text).ext.featureWeights
+    [
+            'halfphoneUnitFeatureDefinition_ac.txt': 'customTargetCostWeights.txt',
+            'joinCostWeights.txt'                  : 'customJoinCostWeights.txt'
+    ].each { srcFileName, destFileName ->
+        copy {
+            from srcFileName
+            into 'src/main/resources'
+            rename { destFileName }
+            filter { line ->
+                def result = line
+                switch (line) {
+                    case ~/^\d+ (linear )?\|.+/:
+                        def match = (line =~ /(\d+( linear)?)\s*\|\s*(\w+)(\s?.*)?/)
+                        if (match.matches()) {
+                            def feature = match[0][3]
+                            def weight = match[0][1]
+                            def values = match[0][4]
+                            result = customWeights[feature] ? "${customWeights[feature]} | $feature$values" : line
+                        }
+                        break
+                    case ~/^\d+ +:.+/:
+                        def (feature, weight) = line.split(/\s*:\s*/)
+                        result = customWeights[feature as int] ? "$feature : ${customWeights[feature as int]}" : line
+                        break
+                    default:
+                        break
+                }
+                result
+            }
+        }
+    }
+}
