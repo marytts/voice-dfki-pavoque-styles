@@ -62,13 +62,14 @@ task extractLab {
         destDir.mkdirs()
     }
     doLast {
+        def mapping = ['H#': '_']
         yamlFiles.each { yamlFile ->
             new Yaml().load(yamlFile.newReader()).each { utterance ->
                 if (utterance.segments) {
                     file("$destDir/${stylemap[utterance.style]}_${utterance.prompt}.lab").withWriter { writer ->
                         writer.println '#'
                         utterance.segments.each { segment ->
-                            writer.println "$segment.end 125 $segment.lab"
+                            writer.println "$segment.end 125 ${mapping[segment.lab] ?: segment.lab}"
                         }
                     }
                 }
