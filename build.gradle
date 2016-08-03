@@ -32,11 +32,13 @@ voice {
 ext {
     styles = ['angry', 'happy', 'neutral', 'poker', 'sad']
     stylemap = [styles, ['sp', 'pp', 'ne', 'pk', 'ob']].transpose().collectEntries()
+    stylerevmap = [['sp', 'pp', 'ne', 'pk', 'ob'], styles].transpose().collectEntries()
     flacFiles = styles.collect { file("$buildDir/pavoque-${it}.flac") }
     yamlFiles = styles.collect { file("$buildDir/pavoque-${it}.yaml") }
 }
 
 import de.undercouch.gradle.tasks.download.Download
+import groovy.xml.*
 import org.yaml.snakeyaml.Yaml
 
 task downloadAudio(type: Download) {
@@ -202,6 +204,34 @@ legacyInit {
             }
         }
     }
+}
+
+task injectStyleIntoAllophones {
+    def srcDir = file("$buildDir/prompt_allophones_nostyle")
+    def destDir = file("$buildDir/prompt_allophones")
+    inputs.files srcDir
+    outputs.dir destDir
+    doFirst {
+        destDir.mkdirs()
+    }
+    doLast {
+        srcDir.eachFileMatch(~/.+\.xml$/) { xmlFile ->
+            def prefix = xmlFile.name.split('_').first()
+            def style = stylerevmap[prefix]
+            def xml = new XmlSlurper(false, false).parse(xmlFile)
+            xml.children().replaceNode { node ->
+                prosody(style: style) {
+                    mkp.yield node
+                }
+            }
+            file("$destDir/$xmlFile.name").text = XmlUtil.serialize(xml)
+        }
+    }
+}
+
+generateAllophones {
+    destDir = file("$buildDir/prompt_allophones_nostyle")
+    finalizedBy injectStyleIntoAllophones
 }
 
 generateVoiceConfig {
