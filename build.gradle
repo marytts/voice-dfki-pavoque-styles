@@ -13,7 +13,7 @@ plugins {
 }
 
 group 'de.dfki.mary'
-version '5.2-SNAPSHOT'
+version '5.2'
 
 voice {
     name = 'dfki-pavoque-styles'
