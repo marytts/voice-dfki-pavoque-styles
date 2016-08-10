@@ -115,7 +115,7 @@ ByteValuedFeatureProcessors
 10 | stressed 0 1
 0 | stressed_syls_from_phrase_end 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19
 0 | stressed_syls_from_phrase_start 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19
-0 | style 0 neutral poker happy sad angry excited
+10000 | style 0 neutral poker happy sad angry excited
 10 | syl_break 0 1 unused 3 4
 0 | syl_numsegs 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19
 0 | syls_from_phrase_end 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19
