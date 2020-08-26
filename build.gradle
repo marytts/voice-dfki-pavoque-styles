@@ -8,25 +8,27 @@ buildscript {
 }
 
 plugins {
-    id 'de.dfki.mary.voicebuilding-legacy' version '5.2.2'
+    id 'de.dfki.mary.voicebuilding-legacy' version '5.5-SNAPSHOT'
     id 'de.undercouch.download' version '3.1.0'
 }
 
 group 'de.dfki.mary'
 version '5.3-SNAPSHOT'
 
-voice {
-    name = 'dfki-pavoque-styles'
-    language = 'de'
-    gender = 'male'
-    type = 'unit selection'
-    description = 'A male German unit selection voice with expressive styles "happy", "sad", "angry", and "poker"'
-    license {
-        name = 'Creative Commons Attribution-NoDerivs 3.0 Unported'
-        shortName = 'CC-BY-ND'
-        url = 'http://mary.dfki.de/download/by-nd-3.0.html'
+marytts {
+    voice {
+        name = 'dfki-pavoque-styles'
+        language = 'de'
+        gender = 'male'
+        type = 'unit selection'
+        description = 'A male German unit selection voice with expressive styles "happy", "sad", "angry", and "poker"'
+        license {
+            name = 'Creative Commons Attribution-NoDerivs 3.0 Unported'
+            shortName = 'CC-BY-ND'
+            url = 'http://mary.dfki.de/download/by-nd-3.0.html'
+        }
+        samplingRate = 16000
     }
-    samplingRate = 16000
 }
 
 ext {
@@ -57,7 +59,7 @@ task downloadData(type: Download) {
 
 task extractLab {
     dependsOn downloadData
-    def destDir = file("$buildDir/lab")
+    ext.destDir = file("$buildDir/lab")
     inputs.file yamlFiles
     outputs.dir destDir
     doFirst {
@@ -82,7 +84,7 @@ task extractLab {
 
 task extractText {
     dependsOn downloadData
-    def destDir = file("$buildDir/text")
+    ext.destDir = file("$buildDir/text")
     inputs.file yamlFiles
     outputs.dir destDir
     doFirst {
@@ -115,8 +117,8 @@ task extractWav {
                 if (utterance.segments) {
                     exec {
                         commandLine 'sox', flacFile, "$destDir/${stylemap[utterance.style]}_${utterance.prompt}.wav",
-                                'trim', utterance.start, "=$utterance.end",
-                                'rate', voice.samplingRate
+                        'trim', utterance.start, "=$utterance.end",
+                        'rate', voice.samplingRate
                     }
                 }
             }
@@ -136,75 +138,59 @@ task generateStyleDefinitionFile {
     }
 }
 
-legacyInit {
-    dependsOn extractLab, extractText, extractWav, generateStyleDefinitionFile
-    def basenameListFile = file("$buildDir/basenames.lst")
-    outputs.files basenameListFile
-    doLast {
-        basenameListFile.withWriter { basenameList ->
-            fileTree(wav.destDir).collect {
-                it.name - '.wav'
-            }.minus([
-                    'ne_a0181',
-                    'ne_a0215',
-                    'ne_a0225',
-                    'ne_a0385',
-                    'ne_a0401',
-                    'ne_a0425',
-                    'ne_a0544',
-                    'ne_a0718',
-                    'ne_a0923',
-                    'ne_a1095',
-                    'ne_a1332',
-                    'ne_a1590',
-                    'ne_e0078',
-                    'ne_e0101',
-                    'ne_e0197',
-                    'ne_e0268',
-                    'ne_e0529',
-                    'ne_e0569',
-                    'ne_e0795',
-                    'ne_e0858',
-                    'ne_e0928',
-                    'ne_e0959',
-                    'ne_e0966',
-                    'ne_e1094',
-                    'ne_e1113',
-                    'ne_e1137',
-                    'ne_e1149',
-                    'ne_e1175',
-                    'ne_e1269',
-                    'ne_e1282',
-                    'ne_e1301',
-                    'ob_m0222',
-                    'ob_m0281',
-                    'ob_m0304',
-                    'ob_m0319',
-                    'ob_poker_d0027',
-                    'pk_m0222',
-                    'pk_m0281',
-                    'pk_m0304',
-                    'pp_m0222',
-                    'pp_m0281',
-                    'pp_m0304',
-                    'sp_m0222',
-                    'sp_m0281',
-                    'sp_m0304'
-            ]).each {
-                basenameList.writeLine it
-            }
-        }
-        copy {
-            from project.templates
-            into project.buildDir
-            include configFile.name
-            expand project.properties
-            filter {
-                it.contains('AllophonesExtractor.styleDefinitionFile') ? it + generateStyleDefinitionFile.destFile : it
-            }
-        }
-    }
+basenames {
+    dependsOn "extractWav", "extractText", "extractLab"
+    wavDir = extractWav.destDir
+    textDir = extractText.destDir
+    labDir = extractLab.destDir
+    include '*'
+    exclude 'ne_a0181',
+    'ne_a0215',
+    'ne_a0225',
+    'ne_a0385',
+    'ne_a0401',
+    'ne_a0425',
+    'ne_a0544',
+    'ne_a0718',
+    'ne_a0923',
+    'ne_a1095',
+    'ne_a1332',
+    'ne_a1590',
+    'ne_e0078',
+    'ne_e0101',
+    'ne_e0197',
+    'ne_e0268',
+    'ne_e0529',
+    'ne_e0569',
+    'ne_e0795',
+    'ne_e0858',
+    'ne_e0928',
+    'ne_e0959',
+    'ne_e0966',
+    'ne_e1094',
+    'ne_e1113',
+    'ne_e1137',
+    'ne_e1149',
+    'ne_e1175',
+    'ne_e1269',
+    'ne_e1282',
+    'ne_e1301',
+    'ob_m0222',
+    'ob_m0281',
+    'ob_m0304',
+    'ob_m0319',
+    'ob_poker_d0027',
+    'pk_m0222',
+    'pk_m0281',
+    'pk_m0304',
+    'pp_m0222',
+    'pp_m0281',
+    'pp_m0304',
+    'sp_m0222',
+    'sp_m0281',
+    'sp_m0304'
 }
+
 
 task injectStyleIntoAllophones {
     def srcDir = file("$buildDir/prompt_allophones_nostyle")
@@ -234,6 +220,7 @@ generateAllophones {
     finalizedBy injectStyleIntoAllophones
 }
 
+/*
 generateVoiceConfig {
     afterEvaluate {
         config << [
@@ -242,3 +229,4 @@ generateVoiceConfig {
         ]
     }
 }
+*/
