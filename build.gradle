@@ -60,13 +60,13 @@ task downloadData(type: Download) {
 task extractLab {
     dependsOn downloadData
     ext.destDir = file("$buildDir/lab")
-    inputs.file yamlFiles
+    inputs.files yamlFiles
     outputs.dir destDir
     doFirst {
         destDir.mkdirs()
     }
     doLast {
-        def mapping = ['H#': '_']
+        def mapping = ['H#': '_', '#': '_']
         yamlFiles.each { yamlFile ->
             new Yaml().load(yamlFile.newReader()).each { utterance ->
                 if (utterance.segments) {
@@ -85,7 +85,7 @@ task extractLab {
 task extractText {
     dependsOn downloadData
     ext.destDir = file("$buildDir/text")
-    inputs.file yamlFiles
+    inputs.files yamlFiles
     outputs.dir destDir
     doFirst {
         destDir.mkdirs()
@@ -118,7 +118,7 @@ task extractWav {
                     exec {
                         commandLine 'sox', flacFile, "$destDir/${stylemap[utterance.style]}_${utterance.prompt}.wav",
                         'trim', utterance.start, "=$utterance.end",
-                        'rate', voice.samplingRate
+                        'rate', marytts.voice.samplingRate
                     }
                 }
             }
@@ -220,13 +220,9 @@ generateAllophones {
     finalizedBy injectStyleIntoAllophones
 }
 
-/*
 generateVoiceConfig {
-    afterEvaluate {
-        config << [
-                targetCostWeights: "jar:/marytts/voice/$voice.nameCamelCase/customTargetCostWeights.txt",
-                joinCostWeights  : "jar:/marytts/voice/$voice.nameCamelCase/customJoinCostWeights.txt",
-        ]
-    }
+    config.putAll([
+            targetCostWeights: "jar:/marytts/voice/$marytts.voice.nameCamelCase/customTargetCostWeights.txt",
+            joinCostWeights  : "jar:/marytts/voice/$marytts.voice.nameCamelCase/customJoinCostWeights.txt",
+    ])
 }
-*/
